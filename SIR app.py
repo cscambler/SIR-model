@@ -16,7 +16,7 @@ class SIR_model():
     #initializing the model class basically just creates the vectors for plotting.
     #the method is a straight copy of the MATLAB thing.
     def __init__(self, controller):
-        parameters = self.get_parameters(controller)
+        self.get_parameters(controller)
         self.T = np.arange(1, self.total_days, self.dt)
         
         self.S = np.zeros(self.T.shape)
@@ -30,7 +30,7 @@ class SIR_model():
 
         self.D = np.zeros(self.T.shape)
         
-        self.N = self.total_days
+        self.N = self.population
         
         for i in range(0, len(self.T)-1):
             self.dS = -self.beta*self.I[i]*self.S[i]/self.N
@@ -45,7 +45,7 @@ class SIR_model():
     def get_parameters(self, controller):
         controls = controller.controls
         self.total_days = int(controls.total_time.get())
-        self.dt = .001
+        self.dt = .1
         self.population = int(controls.total_pop.get())
         self.initial_infects = int(controls.initial_infects.get())
         self.immune_at_outset = int(controls.immune.get())
@@ -142,7 +142,6 @@ def update(display_frame):
     #update axis with new model
     else:
         display_frame.ax.clear()
-        display_frame.canvas.draw()
         model = SIR_model(display_frame.parent)
         display_frame.ax.plot(model.T, model.S)
         display_frame.ax.plot(model.T, model.I)
