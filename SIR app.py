@@ -1,7 +1,7 @@
 #I wrote this little GUI to let us see how changing the parameters in the SIR model affects things.
-#One upshot seems to be that setting N = 1 makes the infection rate redundant.
-#Not sure if everything is right though! Comments welcome
+#One upshot seems to be that setting N = 1 makes the infection rate redundant. Makes sense I guess; only one person means noone gets infected!
 #One other thing: I think it's best to keep the numbers low, below 1000 at the most. 
+#Would appreciate mathematical insight on why. Is something deeper wrong?
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,6 +27,8 @@ class SIR_model():
         
         self.R = np.zeros(self.T.shape)
         self.R[0] = self.immune_at_outset
+
+        self.D = np.zeros(self.T.shape)
         
         self.N = self.total_days
         
@@ -38,10 +40,12 @@ class SIR_model():
             self.S[i+1] = self.S[i]+self.dS*self.dt
             self.I[i+1] = self.I[i]+self.dI*self.dt
             self.R[i+1] = self.R[i]+self.dR*self.dt
+            self.D[i+1] = self.R[i+1]*self.delta
+            
     def get_parameters(self, controller):
         controls = controller.controls
         self.total_days = int(controls.total_time.get())
-        self.dt = .01
+        self.dt = .001
         self.population = int(controls.total_pop.get())
         self.initial_infects = int(controls.initial_infects.get())
         self.immune_at_outset = int(controls.immune.get())
@@ -143,7 +147,8 @@ def update(display_frame):
         display_frame.ax.plot(model.T, model.S)
         display_frame.ax.plot(model.T, model.I)
         display_frame.ax.plot(model.T, model.R)
-        display_frame.ax.legend(['Susceptible','Infected', 'Removed'])
+        display_frame.ax.plot(model.T, model.D)
+        display_frame.ax.legend(['Susceptible','Infected', 'Removed', 'Dead'])
         display_frame.canvas.draw()
         
 #event handler
