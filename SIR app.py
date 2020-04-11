@@ -1,7 +1,8 @@
-#I wrote this little GUI to let us see how changing the parameters in the SIR model affects things.
-#One upshot seems to be that setting N = 1 makes the infection rate redundant. Makes sense I guess; only one person means noone gets infected!
-#One other thing: I think it's best to keep the numbers low, below 1000 at the most. 
-#Would appreciate mathematical insight on why. Is something deeper wrong?
+#I wrote this GUI to let us see how changing the parameters in the SIR model affects things.
+#One upshot seems to be that setting N = 1 makes the infection rate redundant.
+#Makes sense I guess; only one person means noone gets infected!
+#The screen refreshes 10 times a second to produce the animated effect.
+
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -59,6 +60,7 @@ class main_window(Tk):
         Tk.__init__(self, parent)
         self.initialize()
         self.title('SIR Model App')
+        self.updater()
     def initialize(self):
         #add menu to control parameters
         self.controls = parameter_menu(self)
@@ -66,8 +68,13 @@ class main_window(Tk):
         #add frame for displaying plots
         self.display_frame = display_frame(self)
         self.display_frame.grid(row = 0, column = 0, columnspan = 3)
-        self.bind("<ButtonRelease-1>", callback)
- 
+        #make interactive
+        #self.bind("<ButtonRelease-1>", callback)
+        self.update_rate = 10
+    def updater(self):
+        update(self.display_frame)
+        self.after(self.update_rate, self.updater)
+        
 #controls menu
 class parameter_menu(Frame):
     def __init__(self, parent):
@@ -150,10 +157,6 @@ def update(display_frame):
         display_frame.ax.legend(['Susceptible','Infected', 'Removed', 'Dead'])
         display_frame.canvas.draw()
         
-#event handler
-def callback(event):
-    update(app.display_frame)
-
 app = main_window()
 app.mainloop()
 
