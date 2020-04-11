@@ -16,6 +16,7 @@ from matplotlib.figure import Figure
 class SIR_model():
     #initializing the model class basically just creates the vectors for plotting.
     #the method is a straight copy of the MATLAB thing.
+    #opted for dt fixed at .1
     def __init__(self, controller):
         self.get_parameters(controller)
         self.T = np.arange(1, self.total_days, self.dt)
@@ -142,20 +143,14 @@ class display_frame(Frame):
         update(self)
 
 def update(display_frame):
-    controls = display_frame.parent.controls
-    #make sure parameters make sense
-    if int(controls.initial_infects.get()) + int(controls.immune.get()) > int(controls.total_pop.get()):
-        messagebox.showerror("Are you crazy?", "Illegitimate values.")
-    #update axis with new model
-    else:
-        display_frame.ax.clear()
-        model = SIR_model(display_frame.parent)
-        display_frame.ax.plot(model.T, model.S)
-        display_frame.ax.plot(model.T, model.I)
-        display_frame.ax.plot(model.T, model.R)
-        display_frame.ax.plot(model.T, model.D)
-        display_frame.ax.legend(['Susceptible','Infected', 'Removed', 'Dead'])
-        display_frame.canvas.draw()
+    display_frame.ax.clear()
+    model = SIR_model(display_frame.parent)
+    display_frame.ax.plot(model.T, model.S)
+    display_frame.ax.plot(model.T, model.I)
+    display_frame.ax.plot(model.T, model.R)
+    display_frame.ax.plot(model.T, model.D)
+    display_frame.ax.legend(['Susceptible','Infected', 'Removed', 'Dead'])
+    display_frame.canvas.draw()
         
 app = main_window()
 app.mainloop()
