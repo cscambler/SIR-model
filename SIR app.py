@@ -14,9 +14,15 @@ from matplotlib.figure import Figure
 
 #model class        
 class SIR_model():
-    #initializing the model class basically just creates the vectors for plotting.
-    #the method is a straight copy of the MATLAB thing.
-    #opted for dt fixed at .1
+    #this class implements the SIR model for disease transmission in a population.
+    #it has attributes S (suscepitble) I (infected) R (recovered/removed) as well as a T for time.
+    #In the end we will plot each of SIR against T.
+    #The model has these related by a system of differential equations,
+    #in constants like infection rate (beta) and recovery rate (gamma).
+    #These are solved in this case by Euler's method (or the "Bozo appraoch");
+    #you just compute the values at a day, compute a crude estimate on the rate of change,
+    #and add the expected change to the value of a day to get the next.
+    #See https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SIR_model
     def __init__(self, controller):
         self.get_parameters(controller)
         self.T = np.arange(1, self.total_days, self.dt)
@@ -64,20 +70,19 @@ class main_window(Tk):
         self.updater()
     def initialize(self):
         #add menu to control parameters
-        self.controls = parameter_menu(self)
+        self.controls = controls_menu(self)
         self.controls.grid(row = 1, column = 0)
         #add frame for displaying plots
         self.display_frame = display_frame(self)
         self.display_frame.grid(row = 0, column = 0, columnspan = 3)
-        #make interactive
-        #self.bind("<ButtonRelease-1>", callback)
+        #refresh 100 times a second with new control values
         self.update_rate = 10
     def updater(self):
         update(self.display_frame)
         self.after(self.update_rate, self.updater)
         
 #controls menu
-class parameter_menu(Frame):
+class controls_menu(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent)
         self.parent = parent
@@ -124,7 +129,7 @@ class parameter_menu(Frame):
 
         #spinbox for initial infects
         initial_box = LabelFrame(self.immune_and_infected, text="Initial Infections = I(0)", padx=5, pady=5)
-        self.initial_infects = Spinbox(initial_box, from_= 0, to = 1000)
+        self.initial_infects = Spinbox(initial_box, from_= 1, to = 1000)
         self.initial_infects.grid()
         initial_box.grid()
         self.immune_and_infected.grid(row = 1, column = 2)
@@ -140,18 +145,46 @@ class display_frame(Frame):
         self.ax = self.figure.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.canvas.get_tk_widget().grid()
-        update(self)
+        #add mini display with log infects
+        self.mini_display = mini_display(self)
+        self.mini_display.grid(row=0, column=1)
 
+#mini display with log infects
+class mini_display(Frame):
+    def __init__(self, parent):
+        Frame.__init__(self, parent)
+        self.parent = parent
+        self.initialize()
+    def initialize(self):
+        self.figure = plt.Figure(figsize=(3,3), dpi=100)
+        self.ax = self.figure.add_subplot(111)
+        self.canvas = FigureCanvasTkAgg(self.figure, self)
+        self.canvas.get_tk_widget().grid()
+
+#update function
 def update(display_frame):
+    mini_display = display_frame.mini_display
+    #clear both axes
     display_frame.ax.clear()
+    mini_display.ax.clear()
+    
+    #produce a new model using current parameters
     model = SIR_model(display_frame.parent)
+
+    #plot the components of the model
     display_frame.ax.plot(model.T, model.S)
     display_frame.ax.plot(model.T, model.I)
     display_frame.ax.plot(model.T, model.R)
     display_frame.ax.plot(model.T, model.D)
     display_frame.ax.legend(['Susceptible','Infected', 'Removed', 'Dead'])
     display_frame.canvas.draw()
-        
+    
+    #plot mini display infects in log scale
+    mini_display.ax.plot(model.T, model.I, color = 'orange')
+    mini_display.ax.set_yscale('log')
+    mini_display.ax.legend(['Infected, log scale'])
+    mini_display.canvas.draw()
+       
 app = main_window()
 app.mainloop()
 
