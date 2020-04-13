@@ -1,5 +1,4 @@
-#I wrote this GUI to let us see how changing the parameters in the SIR model affects things.
-#One upshot seems to be that setting N = 1 makes the infection rate redundant
+#A GUI that shows how changing parameters affects outcomes under the SIR model of disease transmission.
 
 import matplotlib.pyplot as plt
 import numpy as np
