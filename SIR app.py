@@ -1,15 +1,11 @@
 #I wrote this GUI to let us see how changing the parameters in the SIR model affects things.
-#One upshot seems to be that setting N = 1 makes the infection rate redundant.
-#Makes sense I guess; only one person means noone gets infected!
-#The screen refreshes 10 times a second to produce the animated effect.
-
+#One upshot seems to be that setting N = 1 makes the infection rate redundant
 
 import matplotlib.pyplot as plt
 import numpy as np
 from tkinter import *
 from tkinter import messagebox
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from matplotlib.backend_bases import key_press_handler
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 #model class        
@@ -19,7 +15,6 @@ class SIR_model():
     #In the end we will plot each of SIR against T.
     #The model has these related by a system of differential equations,
     #in constants like infection rate (beta) and recovery rate (gamma).
-    #These are solved in this case by Euler's method (or the "Bozo appraoch");
     #you just compute the values at a day, compute a crude estimate on the rate of change,
     #and add the expected change to the value of a day to get the next.
     #See https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SIR_model
@@ -51,6 +46,7 @@ class SIR_model():
             self.D[i+1] = self.R[i+1]*self.delta
             
     def get_parameters(self, controller):
+        #read inputs from on-screen controls
         controls = controller.controls
         self.total_days = int(controls.total_time.get())
         self.dt = .1
@@ -75,8 +71,8 @@ class main_window(Tk):
         #add frame for displaying plots
         self.display_frame = display_frame(self)
         self.display_frame.grid(row = 0, column = 0, columnspan = 3)
-        #refresh 100 times a second with new control values
-        self.update_rate = 10
+        #refresh 10 times a second with new control values
+        self.update_rate = 100
     def updater(self):
         update(self.display_frame)
         self.after(self.update_rate, self.updater)
@@ -87,6 +83,7 @@ class controls_menu(Frame):
         Frame.__init__(self, parent)
         self.parent = parent
         self.initialize()
+        self.record_parameters()
     def initialize(self):
         #sliding scales to control gamma and beta and delta (but where is alpha in all this?)
         self.infection_frame = Frame(self.parent)
@@ -133,7 +130,32 @@ class controls_menu(Frame):
         self.initial_infects.grid()
         initial_box.grid()
         self.immune_and_infected.grid(row = 1, column = 2)
-
+    def record_parameters(self):
+        self.gamma_val = self.gamma_scale.get()
+        self.beta_val = self.beta_scale.get()
+        self.delta_val = self.delta_scale.get()
+        self.pop_val = self.total_pop.get()
+        self.time_val = self.total_time.get()
+        self.immune_val = self.immune.get()
+        self.infects_val = self.initial_infects.get()
+    def change_in_parameters(self):
+        if self.gamma_val != self.gamma_scale.get():
+            return True
+        if self.beta_val != self.beta_scale.get():
+            return True
+        if self.delta_val != self.delta_scale.get():
+            return True
+        if self.pop_val != self.total_pop.get():
+            return True
+        if self.time_val != self.total_time.get():
+            return True
+        if self.immune_val != self.immune.get():
+            return True
+        if self.infects_val != self.initial_infects.get():
+            return True
+        else:
+            return False
+            
 class display_frame(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent)
@@ -163,27 +185,32 @@ class mini_display(Frame):
 
 #update function
 def update(display_frame):
-    mini_display = display_frame.mini_display
-    #clear both axes
-    display_frame.ax.clear()
-    mini_display.ax.clear()
+    controls = display_frame.parent.controls
+    if controls.change_in_parameters():
+        controls.record_parameters()
+        mini_display = display_frame.mini_display
+        #clear both axes
+        display_frame.ax.clear()
+        mini_display.ax.clear()
     
-    #produce a new model using current parameters
-    model = SIR_model(display_frame.parent)
+        #produce a new model using current parameters
+        model = SIR_model(display_frame.parent)
 
-    #plot the components of the model
-    display_frame.ax.plot(model.T, model.S)
-    display_frame.ax.plot(model.T, model.I)
-    display_frame.ax.plot(model.T, model.R)
-    display_frame.ax.plot(model.T, model.D)
-    display_frame.ax.legend(['Susceptible','Infected', 'Removed', 'Dead'])
-    display_frame.canvas.draw()
+        #plot the components of the model
+        display_frame.ax.plot(model.T, model.S)
+        display_frame.ax.plot(model.T, model.I)
+        display_frame.ax.plot(model.T, model.R)
+        display_frame.ax.plot(model.T, model.D)
+        display_frame.ax.legend(['Susceptible','Infected', 'Removed', 'Dead'])
+        display_frame.canvas.draw()
     
-    #plot mini display infects in log scale
-    mini_display.ax.plot(model.T, model.I, color = 'orange')
-    mini_display.ax.set_yscale('log')
-    mini_display.ax.legend(['Infected, log scale'])
-    mini_display.canvas.draw()
+        #plot mini display infects in log scale
+        mini_display.ax.plot(model.T, model.I, color = 'orange')
+        mini_display.ax.set_yscale('log')
+        mini_display.ax.legend(['Infected, log scale'])
+        mini_display.canvas.draw()
+
+current_settings = [ ]
        
 app = main_window()
 app.mainloop()
