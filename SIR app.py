@@ -70,8 +70,8 @@ class main_window(Tk):
         #add frame for displaying plots
         self.display_frame = display_frame(self)
         self.display_frame.grid(row = 0, column = 0, columnspan = 3)
-        #refresh 10 times a second with new control values
-        self.update_rate = 100
+        #refresh 100 times a second with new control values
+        self.update_rate = 10
     def updater(self):
         update(self.display_frame)
         self.after(self.update_rate, self.updater)
