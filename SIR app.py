@@ -209,8 +209,6 @@ def update(display_frame):
         mini_display.ax.set_yscale('log')
         mini_display.ax.legend(['Infected, log scale'])
         mini_display.canvas.draw()
-
-current_settings = [ ]
        
 app = main_window()
 app.mainloop()
