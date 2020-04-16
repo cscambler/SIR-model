@@ -14,6 +14,7 @@ class SIR_model():
     #In the end we will plot each of SIR against T.
     #The model has these related by a system of differential equations,
     #in constants like infection rate (beta) and recovery rate (gamma).
+    #The equations are solved using Euler's method (AKA the "Bozo method"):
     #you just compute the values at a day, compute a crude estimate on the rate of change,
     #and add the expected change to the value of a day to get the next.
     #See https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SIR_model
