@@ -157,6 +157,7 @@ class controls_menu(Frame):
             return True
         else:
             return False
+        
 #frame for displaying main plot          
 class display_frame(Frame):
     def __init__(self, parent):
