@@ -130,6 +130,7 @@ class controls_menu(Frame):
         self.initial_infects.grid()
         initial_box.grid()
         self.immune_and_infected.grid(row = 1, column = 2)
+    #find out the current parameters and store as attributes
     def record_parameters(self):
         self.gamma_val = self.gamma_scale.get()
         self.beta_val = self.beta_scale.get()
@@ -138,6 +139,7 @@ class controls_menu(Frame):
         self.time_val = self.total_time.get()
         self.immune_val = self.immune.get()
         self.infects_val = self.initial_infects.get()
+    #method to check if user has changed parameters from stored attributes
     def change_in_parameters(self):
         if self.gamma_val != self.gamma_scale.get():
             return True
@@ -155,7 +157,7 @@ class controls_menu(Frame):
             return True
         else:
             return False
-            
+#frame for displaying main plot          
 class display_frame(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent)
